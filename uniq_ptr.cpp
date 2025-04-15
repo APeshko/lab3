@@ -2,10 +2,10 @@
 #include <memory>
 #include <fstream>
 
-class FileResource {
+class Class {
     std::unique_ptr<std::fstream> file;
 public:
-    explicit FileResource(const std::string& filename) {
+    explicit Class(const std::string& filename) {
         file = std::make_unique<std::fstream>(filename, std::ios::out);
         if (!file->is_open()) {
             throw std::runtime_error("Failed to open file");
@@ -13,7 +13,7 @@ public:
         std::cout << "File opened: " << filename << std::endl;
     }
 
-    ~FileResource() {
+    ~Class() {
         if (file && file->is_open()) {
             file->close();
             std::cout << "File closed" << std::endl;
@@ -27,21 +27,21 @@ public:
     }
 
     // Запрещаем копирование
-    FileResource(const FileResource&) = delete;
-    FileResource& operator=(const FileResource&) = delete;
+    Class(const FileResource&) = delete;
+    Class& operator=(const Class&) = delete;
 
     // Разрешаем перемещение
-    FileResource(FileResource&&) = default;
-    FileResource& operator=(FileResource&&) = default;
+    Class(Class&&) = default;
+    Class& operator=(Class&&) = default;
 };
 
 int main() {
     try {
-        FileResource file("test.txt");
-        file.write("Hello RAII!");
+        Class file("test.txt");
+        file.write("ок!");
         
         // Демонстрация перемещения
-        FileResource movedFile = std::move(file);
+        Class movedFile = std::move(file);
         movedFile.write("Moved resource works!");
         
     } catch (const std::exception& e) {
