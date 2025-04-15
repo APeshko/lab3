@@ -5,6 +5,7 @@ class Observer;
 
 class Subject {
     std::weak_ptr<Observer> weak_observer; //weak_ptr используется для наблюдения за объектом Observer, не увеличивая счётчик ссылок
+// ссылка на наблюдателя
 public:
   // Установка наблюдателя
     void setObserver(std::shared_ptr<Observer> obs) {
