@@ -15,14 +15,15 @@ public:
     void notify();
 };
 
-class Observer : public std::enable_shared_from_this<Observer> {
+class Observer : public std::enable_shared_from_this<Observer> { 
+//enable_shared_from_this позволяет безопасно получить shared_ptr из метода класса
 public:
 // Подписка на субъект
     void subscribe(Subject& subj) {
         // Получаем shared_ptr из this (наследование enable_shared_from_this)
         subj.setObserver(shared_from_this());
     }
-    
+    // Реакция на уведомление
     void onNotify() {
         std::cout << "Получено уведомление!" << std::endl;
     }
@@ -35,6 +36,9 @@ void Subject::notify() {
         std::cout << "наблюдателя больше нет" << std::endl; //проверка есть ли наблюдатель перед уведомлением его
     }
 }
+//lock() пытается создать shared_ptr из weak_ptr
+//если исходный объект ещё существует - возвращает валидный shared_ptr
+//если объект уже удалён - возвращает nullptr
 
 int main() {
     auto subject = Subject();
