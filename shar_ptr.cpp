@@ -1,16 +1,25 @@
 #include <iostream>
 #include <memory>
-
-void sharedPtrDemo() {
-    std::shared_ptr<int> p1 = std::make_shared<int>(10);
-    {
-        std::shared_ptr<int> p2 = p1; // p2 разделяет владение
-        std::cout << "Value: " << *p2 << ", Count: " << p1.use_count() << "\n"; // Count: 2
-    }
-    std::cout << "Count after p2 goes out of scope: " << p1.use_count() << "\n"; // Count: 1
-}
+#include <vector>
+//про раздельное владение и доступ к одним данным 
+class Class {
+public:
+    Class() { std::cout << "Ресурс создан"; }
+    ~Class() { std::cout << "Ресурс уничтожен"; }
+};
 
 int main() {
-    sharedPtrDemo();
-    return 0; // Ресурс автоматически освобождается, когда последний shared_ptr уничтожается.
+    auto resource = std::make_shared<Class>();
+    
+    std::vector<std::shared_ptr<Class>> owners;
+    
+    for (int i = 0; i < 3; ++i) {
+        owners.push_back(resource);
+        std::cout << "Количество ссылок: " << resource.use_count() << std::endl;
+    }
+    
+    owners.clear();
+    std::cout << "Количество ссылок после очистки: " << resource.use_count() << std::endl;
+    
+    return 0;
 }
