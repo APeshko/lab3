@@ -14,16 +14,17 @@ public:
         std::cout << "File opened: " << filename << std::endl;
     }
 
-    ~Class() {
-        if (file && file->is_open()) { // Проверка, что указатель не nullptr и файл открыт
-            file->close(); // Закрытие файла
-            std::cout << "File closed" << std::endl;
-        }
-    }
+  //  ~Class() {
+   //     if (file && file->is_open()) { // Проверка, что указатель не nullptr и файл открыт
+    //        file->close(); // Закрытие файла
+  //          std::cout << "File closed" << std::endl;
+   //     }
+ //   }
+// Деструктор не нужен - unique_ptr сам освободит ресурс
 
     void write(const std::string& data) {
         if (file) { // Проверка, что указатель не nullptr
-            *file << data << std::endl;
+            *file << data << std::endl; // безопасная запись
         }
     }
 
