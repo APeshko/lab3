@@ -15,20 +15,19 @@ public:
     }
 
     ~Class() {
-        if (file && file->is_open()) {
-            file->close();
+        if (file && file->is_open()) { // Проверка, что указатель не nullptr и файл открыт
+            file->close(); // Закрытие файла
             std::cout << "File closed" << std::endl;
         }
     }
 
     void write(const std::string& data) {
-        if (file) {
+        if (file) { // Проверка, что указатель не nullptr
             *file << data << std::endl;
         }
     }
 
-    // Запрещаем копирование
-    Class(const FileResource&) = delete;
+    Class(const FileResource&) = delete;  // Запрет копирования
     Class& operator=(const Class&) = delete;
 
     // Разрешаем перемещение
