@@ -8,16 +8,18 @@ class Subject {
 // ссылка на наблюдателя
 public:
   // Установка наблюдателя
-    void setObserver(std::shared_ptr<Observer> obs) {
-        weak_observer = obs;
+    void setObserver(std::shared_ptr<Observer> obs) { 
+        weak_observer = obs; // сохраняем weak_ptr (не увеличивает счётчик ссылок)
     }
-    
+    // метод для уведомления наблюдателя
     void notify();
 };
 
 class Observer : public std::enable_shared_from_this<Observer> {
 public:
+// Подписка на субъект
     void subscribe(Subject& subj) {
+        // Получаем shared_ptr из this (наследование enable_shared_from_this)
         subj.setObserver(shared_from_this());
     }
     
