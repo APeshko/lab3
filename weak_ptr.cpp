@@ -1,33 +1,47 @@
 #include <iostream>
 #include <memory>
 
-class Observer {
+class Observer;
+
+class Subject {
+    std::weak_ptr<Observer> weak_observer; //weak_ptr используется для наблюдения за объектом Observer, не увеличивая счётчик ссылок
 public:
-    void observe(std::shared_ptr<int> sharedPtr) {
-        weakPtr = sharedPtr; // Наблюдение без продления жизни
+  // Установка наблюдателя
+    void setObserver(std::shared_ptr<Observer> obs) {
+        weak_observer = obs;
     }
-
-    void check() {
-        if (auto lockedPtr = weakPtr.lock()) { // Пытаемся получить доступ
-            std::cout << "Resource is alive: " << *lockedPtr << "\n";
-        } else {
-            std::cout << "Resource is no longer available\n";
-        }
-    }
-
-private:
-    std::weak_ptr<int> weakPtr; // weak_ptr не увеличивает счетчик ссылок
+    
+    void notify();
 };
 
+class Observer : public std::enable_shared_from_this<Observer> {
+public:
+    void subscribe(Subject& subj) {
+        subj.setObserver(shared_from_this());
+    }
+    
+    void onNotify() {
+        std::cout << "Получено уведомление!" << std::endl;
+    }
+};
+
+void Subject::notify() {
+    if (auto obs = weak_observer.lock()) { // метод lock() преобразует weak_ptr в shared_ptr для безопасного доступа
+        obs->onNotify();
+    } else {
+        std::cout << "наблюдателя больше нет" << std::endl; //проверка есть ли наблюдатель перед уведомлением его
+    }
+}
+
 int main() {
-    std::shared_ptr<int> resource = std::make_shared<int>(42);
-    Observer observer;
-
-    observer.observe(resource);
-    observer.check(); // Должно показать, что ресурс доступен
-
-    resource.reset(); // Унич ресурс
-    observer.check(); // Должно показать, что ресурс больше не доступен
-
-    return 0;
+    auto subject = Subject();
+    {
+        auto observer = std::make_shared<Observer>(); // наблюдатель создаётся через shared_ptr, что демонстрирует разделяемое владение
+        observer->subscribe(subject);
+        subject.notify(); // Работает
+    } // здесь, weak_ptr не продлевает жизнь объекта — после удаления observer уведомление не срабатывает
+    subject.notify(); // Не работает - наблюдатель удалён
+    
+   //Subject (субъект) уведомляет Observer (наблюдателя)
+//наблюдатель м/б удалён, и субъект это корректно обрабатывает
 }
