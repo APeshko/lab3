@@ -1,14 +1,15 @@
 #include <iostream>
-#include <memory>
-#include <fstream>
+#include <memory> // для умных указателей (unique_ptr)
+#include <fstream> // для управление файлами
 
-class Class {
-    std::unique_ptr<std::fstream> file;
+class Class { //управление файловым ресурсом
+    std::unique_ptr<std::fstream> file; // Умный указатель на файловый поток
 public:
-    explicit Class(const std::string& filename) {
-        file = std::make_unique<std::fstream>(filename, std::ios::out);
-        if (!file->is_open()) {
-            throw std::runtime_error("Failed to open file");
+    explicit Class(const std::string& filename) { //через explicit не даст неявное преобразование 
+        file = std::make_unique<std::fstream>(filename, std::ios::out); //файл открывается для записи, std::make_unique создает unique_ptr с новым fstream
+        //не забыть, что std::ios::out - режим открытия файла (запись)
+        if (!file->is_open()) { //проверяю открылся ли он
+            throw std::runtime_error("Failed to open file"); //при таком раскладе выбрасывается исключение об ошибке
         }
         std::cout << "File opened: " << filename << std::endl;
     }
