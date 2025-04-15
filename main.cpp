@@ -2,10 +2,10 @@
 #include <fstream>
 
 class Class {
-    std::fstream* file; // Опасный raw pointer (для демонстрации утечки)
+    std::fstream* file; // указатель на файловый поток
 public:
     explicit Class(const std::string& filename) {
-        file = new std::fstream(filename, std::ios::out); // Явный new без delete!
+        file = new std::fstream(filename, std::ios::out); // Выделение памяти вручную
         if (!file->is_open()) {
             // Утечка: память не освобождается при исключении
             throw std::runtime_error("Failed to open file");
@@ -14,9 +14,8 @@ public:
     }
 
     ~Class() {
-        // Намеренно "забываем" освободить память
         if (file && file->is_open()) {
-            file->close(); // Закрываем файл, но не удаляем указатель
+            file->close(); // Закрытие файла, но без удаления объекта
         }
         std::cout << "~Class(): Memory leaked for file handler!" << std::endl;
     }
