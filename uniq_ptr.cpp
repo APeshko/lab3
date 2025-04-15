@@ -1,55 +1,50 @@
 #include <iostream>
-#include <memory> // для умных указателей (unique_ptr)
-#include <fstream> // для управление файлами
+#include <memory>
+#include <fstream>
 
-class Class { //управление файловым ресурсом
-    std::unique_ptr<std::fstream> file; // Умный указатель на файловый поток
+
+class File {
+    std::unique_ptr<std::fstream> file; // умный указатель на файловый поток
+
 public:
-    explicit Class(const std::string& filename) { //через explicit не даст неявное преобразование 
-        file = std::make_unique<std::fstream>(filename, std::ios::out); //файл открывается для записи, std::make_unique создает unique_ptr с новым fstream
-        //не забыть, что std::ios::out - режим открытия файла (запись)
-        if (!file->is_open()) { //проверяю открылся ли он
-            throw std::runtime_error("Failed to open file"); //при таком раскладе выбрасывается исключение об ошибке
+    explicit File (const std::string& filename) {
+        //открытие файла через умный указатель
+        file = std::make_unique<std::fstream>(filename, std::ios::out);
+        
+        // Проверка  открытия
+        if (!file->is_open()) {
+            throw std::runtime_error("Не удалось открыть файл");
         }
-        std::cout << "File opened: " << filename << std::endl;
+        std::cout << "Файл " << filename << " успешно открыт" << std::endl;
     }
 
-  //  ~Class() {
-   //     if (file && file->is_open()) { // Проверка, что указатель не nullptr и файл открыт
-    //        file->close(); // Закрытие файла
-  //          std::cout << "File closed" << std::endl;
-   //     }
- //   }
-// Деструктор не нужен - unique_ptr сам освободит ресурс
-
+    /**
+     * Запись данных в файл
+     */
     void write(const std::string& data) {
-        if (file) { // Проверка, что указатель не nullptr
-            *file << data << std::endl; // безопасная запись
+        // Проверяем, что файл доступен для записи
+        if (file && *file) {
+            *file << data << std::endl; // Безопасная запись
+        } else {
+            std::cout << "Ошибка записи: файл не доступен" << std::endl;
         }
     }
 
-    Class(const FileResource&) = delete;  // Запрет копирования
-    Class& operator=(const Class&) = delete;
-
-    // Разрешаем перемещение
-    Class(Class&&) = default;
-    Class& operator=(Class&&) = default;
+    // Деструктора нету unique_ptr автоматически закроет файл
 };
 
 int main() {
     try {
-        Class file("test.txt");
-        file.write("ок!");
+        // create менеджер файла (файл откроется автоматически)
+        File manager("test.txt");
         
-        // Демонстрация перемещения
-        Class movedFile = std::move(file);
-        movedFile.write("Moved resource works!");
+        // use файл через безопасный интерфейс
+        manager.write("Первая запись");
+        manager.write("Вторая запись");
         
     } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+        // Обработка возможных ошибок
+        std::cout << "Ошибка: " << e.what() << std::endl;
+        return 1;
     }
-    
-    return 0;
 }
-
-
